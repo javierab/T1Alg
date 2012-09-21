@@ -1,4 +1,4 @@
-T1Alg
+Tarea 1 de Algoritmos
 =====
 
-tarea1 algoritmos
+Holiiii :3
