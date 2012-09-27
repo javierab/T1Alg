@@ -1,37 +1,35 @@
-#define b 100
+#include "rect.h"
+#include "tarea1.h"
+
+#define b 1
 #define B 4096
-#define TRUE 1
-#define FALSE 0
 
 typedef struct{
-	float x1;
-	float x2;
-	float y1;
-	float y2;
+	rect *r;
 	int child;
-}rect;
-
+}nodeVal;
 
 typedef struct{
 	int size;
 	int address;
-	rect *values[2*b+1];
+	nodeVal *values[2*b+1];
 	rect *MBR;
 	int leaf;
 }node;
 
 typedef struct{
-	int node1; //nombre de nodo
-	int node2;
-	rect *rect1;
-	rect *rect2;
-}insertVal
+	node *root;
+}RTree;
 
-node *readNode(int i);
-void writeNode(node *n);
-int intersect(rect *r1,rect *r2);
-//rect *makeRect(float x1,float y1, float x2, float y2);
-float area(rect *r);
-float deltaMBR(rect *MBR, rect *newRect);
 
+typedef struct{
+	node *node1; //nombre de nodo
+	node *node2;
+}insertVal;
+
+
+RTree *makeTree();
+void insert(RTree *t, nodeVal *v);
+void freeNode(node *n);
+void freeNodeVal(nodeVal *nv);
 

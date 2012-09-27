@@ -1,9 +1,3 @@
-/*
- *  tarea1.h
- *  
- *
- *  Created by Estefania Vidal on 9/21/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
- *
- */
-
+#define TRUE 1
+#define FALSE 0
+#define new(X) (X *)malloc(sizeof(X))
