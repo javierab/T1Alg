@@ -10,6 +10,12 @@ typedef struct{
 }nodeVal;
 
 typedef struct{
+	int int1;
+	int int2;
+}twoInts;
+
+
+typedef struct{
 	int size;
 	int address;
 	nodeVal *values[2*b+1];
@@ -32,4 +38,5 @@ RTree *makeTree();
 void insert(RTree *t, nodeVal *v);
 void freeNode(node *n);
 void freeNodeVal(nodeVal *nv);
+int search(rect *r, RTree *t, twoInts **resp);
 

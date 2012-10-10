@@ -30,7 +30,7 @@ node *readNode(int address){
 	f=fopen(filename,"r");
 
 	if(f == NULL){
-		fprintf(stderr, "Error al abrir el archivo: %s\n"), strerror(errno);
+		fprintf(stderr, "Error al abrir el archivo.\n");
 		exit(1);
 	}
 
@@ -45,13 +45,16 @@ node *readNode(int address){
 	//mbr
 	fscanf(f,"%f,%f,%f,%f", &x1,&y1,&x2,&y2);
 	n->MBR = makeRect(x1,y1,x2,y2);
-
+    int a;
 	for(i=0;i<size;i++){
-		fscanf(f,"%f,%f,%f,%f,%d", &x1,&y1,&x2,&y2,&child);
+		a = fscanf(f,"%f,%f,%f,%f,%d", &x1,&y1,&x2,&y2,&child);
+        n->values[i] = new(nodeVal);
 		n->values[i]->r = makeRect(x1,y1,x2,y2);
 		n->values[i]->child = child;
 	}
+    
 	fclose(f);
+    
 	return n;
 }
 
@@ -64,7 +67,7 @@ void writeNode(node *n){
 	FILE *f=fopen(filename,"w");
 
 	if(f == NULL){
-		fprintf(stderr, "Error al abrir el archivo: %s\n"), strerror(errno);
+		fprintf(stderr, "Error al abrir el archivo.\n");
 		exit(1);
 	}
 	//Size,leaf
@@ -91,7 +94,7 @@ void freeNodeVal(nodeVal *v){
 void freeNode(node *n){
 	int i;
 	if(n != NULL){
-		for(i=0; i<2*b+1; ++i)
+		for(i=0; i<n->size; ++i)
 			freeNodeVal(n->values[i]);
 		freeRect(n->MBR);
 		free(n);
@@ -106,24 +109,59 @@ void destroyNode(node *n){
 	unlink(filename);
 }
 
-insertVal *split(node *n){
+twoInts *selectRect1(nodeVal **values){
+    float max_area;
+    twoInts *resp = new(twoInts);
+    rect *mbr = NULL;
+    int i,j;
+	for (i=0;i<2*b+1;i++){
+        for (j=i+1;j<2*b+1;j++){
+            freeRect(mbr);
+            mbr = dupRect(values[i]->r);
+            increaseMBR(mbr, values[j]->r);
+            if(area(mbr) > max_area){
+                max_area = area(mbr);
+                resp->int1 = i;
+                resp->int2 = j;
+            }
+                
+        }
+    }
+    return resp;
+}
+
+twoInts *selectRect2(nodeVal **values){
+    float max_dist, d;
+    twoInts *resp = new(twoInts);
+    int i,j;
+	for (i=0;i<2*b+1;i++){
+        for (j=i+1;j<2*b+1;j++){
+                if((d = distancia(values[i]->r,values[j]->r)) > max_dist){
+                max_dist = d;
+                resp->int1 = i;
+                resp->int2 = j;
+            }
+                
+        }
+    }
+    return resp;
+
+}
+
+
+insertVal *split(node *n, int leaf){
 	node *group1, *group2;
 	insertVal *ret;
+    int imax, jmax, i;
+    twoInts *resp = selectRect2(n->values);
+    imax = resp->int1;
+    jmax = resp->int2;
+    free(resp);
+        
+    rect *r1 = n->values[imax]->r;
 
-	int max1,max2,i;
-	float amax=0;
-	for (i=0;i<2*b+1;i++)
-		if(area(n->values[i]->r) > amax){
-			max1=i;
-			amax=area(n->values[i]->r);
-		}
-	amax=0;
-	for (i=0;i<2*b+1;i++)
-		if(area(n->values[i]->r)>amax && i!=max1){
-			max2=i;
-			amax=area(n->values[i]->r);
-		}			
-
+    rect *r2 = n->values[jmax]->r;
+    
 	group1=new(node);
 	group2=new(node);
 
@@ -132,28 +170,32 @@ insertVal *split(node *n){
 	group2->address = getNext();
 
 	group1->size=group2->size=0;
-	group1->values[group1->size++] = n->values[max1];
-	group2->values[group2->size++] = n->values[max2];
+	group1->values[group1->size++] = n->values[imax];
+	group2->values[group2->size++] = n->values[jmax];
 
 
-	n->values[max1]=NULL;
-	n->values[max2]=NULL;
+	n->values[imax]=NULL;
+	n->values[jmax]=NULL;
 	rect *mbr1=dupRect(group1->values[0]->r);
 	rect *mbr2=dupRect(group2->values[0]->r);
-	float dif=0,maxdif=0;
+	float dif=0,maxdif;
+    maxdif=0;
 	int idif;
 	int step = 2*b-1;
 	while(step-- > 0){
 
 		for (i=0;i<2*b+1;i++){
 			if(n->values[i]!=NULL){
-				fprintf(stderr,"%d\t %f %f\n",i, deltaMBR(mbr1,n->values[i]->r), deltaMBR(mbr2,n->values[i]->r) );
 				dif=abs(deltaMBR(mbr1,n->values[i]->r)-deltaMBR(mbr2,n->values[i]->r));
-				if(dif>maxdif)
+                
+				if(dif>=maxdif){
+                    maxdif = dif;
 					idif=i;
+                }
 			}
 		}
-		if(deltaMBR(mbr1,n->values[idif]->r)<deltaMBR(mbr2,n->values[idif]->r)){
+        
+		if(deltaMBR(mbr1,n->values[idif]->r)<=deltaMBR(mbr2,n->values[idif]->r)){
 			group1->values[group1->size++] = n->values[idif];
 			increaseMBR(mbr1, n->values[idif]->r);
 		}
@@ -163,9 +205,10 @@ insertVal *split(node *n){
 		}	
 		n->values[idif] = NULL;
 	}
-
 	group1->MBR = mbr1;
 	group2->MBR = mbr2;
+    group1->leaf = leaf;
+    group2->leaf = leaf;
 
 	ret = new(insertVal);
 	
@@ -184,6 +227,8 @@ insertVal *recInsert(node *n, nodeVal *val){
 	rect *r;
 	node *n1, *n2;
 	insertVal *ret;
+    
+    
 
 	if(!n->leaf){
 		int min = 1 << 20, imin,mbr;
@@ -208,6 +253,7 @@ insertVal *recInsert(node *n, nodeVal *val){
 			}
 			
 		}
+        
 		increaseMBR(n->MBR, val->r);
 
 		ret = recInsert(readNode(n->values[imin]->child), val);
@@ -216,8 +262,9 @@ insertVal *recInsert(node *n, nodeVal *val){
 		free(ret);
 		
 		if(ret->node2 == NULL){
+        
 			freeNodeVal(n->values[imin]);
-			n->values[n->size] = new(nodeVal);
+			n->values[imin] = new(nodeVal);
 			n->values[imin]->r = dupRect(n1->MBR);
 			n->values[imin]->child = n1->address;
 
@@ -242,12 +289,18 @@ insertVal *recInsert(node *n, nodeVal *val){
 				ret->node2 = NULL;
 			}
 			else{
+                freeNodeVal(n->values[imin]);
+                n->values[imin] = new(nodeVal);
+                n->values[imin]->r = dupRect(n1->MBR);
+                n->values[imin]->child = n1->address;
+            
+            
 				freeNodeVal(n->values[2*b]);
-				n->values[n->size] = new(nodeVal);
+				n->values[2*b] = new(nodeVal);
 				n->values[2*b]->r = dupRect(n2->MBR);
 				n->values[2*b]->child = n2->address;
 
-				ret = split(n);
+				ret = split(n, FALSE);
 			}
 		}
 
@@ -270,7 +323,7 @@ insertVal *recInsert(node *n, nodeVal *val){
 		else{
 			freeNodeVal(n->values[2*b]);
 			n->values[2*b] = val;
-			return split(n);
+			return split(n, TRUE);
 
 		}
 	}
@@ -315,3 +368,50 @@ void insert(RTree *t, nodeVal *val){
 		}
 	}
 }
+
+
+int size_resp = 100;
+
+void dupResp(twoInts **resp){
+    size_resp <<= 1;
+    resp = (twoInts **) realloc(resp,size_resp*sizeof(twoInts *));
+}
+
+void recSearch(rect *r, node *n, twoInts **resp, int *offset){
+    int i;
+    node *n1;
+    if(n->leaf){
+        for(i = 0; i < n->size; ++i){
+            if(intersect(r, n->values[i]->r)){
+                twoInts *twoints = new(twoInts);
+                twoints->int1 = n->address;
+                twoints->int2 = i;
+                if(*offset == size_resp)
+                    dupResp(resp);
+                resp[(*offset)++] = twoints; 
+                fprintf(stderr,"Intersecta con: %d,%d\n\n", twoints->int1, twoints->int2);
+            }
+        }
+        return;
+    }
+
+    for(i = 0; i < n->size; ++i)
+        if(intersect(r, n->values[i]->r)){
+            n1 = readNode(n->values[i]->child);
+            recSearch(r, n1, resp, offset);
+            freeNode(n1);
+        }
+}
+
+int search(rect *r, RTree *t, twoInts **resp){
+    resp = (twoInts **) malloc(size_resp*sizeof(twoInts *)); 
+    int offset = 0;
+    if(t->root == NULL)
+        return 0;
+    int i;
+    recSearch(r, t->root, resp, &offset);
+    return offset;
+}
+
+
+

@@ -14,6 +14,17 @@ rect *makeRect(float x1, float y1, float x2, float y2){
 	return r;
 }
 
+float distancia(rect *r1, rect *r2){
+    float xc1 = (r1->x1+r1->x2)/2;
+    float yc1 = (r1->y1+r1->y2)/2;
+    float xc2 = (r2->x1+r2->x2)/2;
+    float yc2 = (r2->y1+r2->y2)/2;
+
+    return sqrt((xc1-xc2)*(xc1-xc2)+(yc1-yc2)*(yc1-yc2));
+}
+
+
+
 
 void freeRect(rect *r){
 	if(r != NULL)
@@ -23,6 +34,11 @@ void freeRect(rect *r){
 float area(rect *r){
 	return abs(r->x2 - r->x1)*abs(r->y2 - r->y1);
 }
+
+void printRect(rect *r){
+    fprintf(stderr, "(%f,%f) (%f,%f)\n",r->x1,r->y1, r->x2, r->y2);
+}
+
 
 rect *increaseMBR(rect *MBR, rect *r){
 	//asumiendo que siempre x1<x2 e y1<y2
