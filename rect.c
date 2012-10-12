@@ -52,12 +52,12 @@ rect *increaseMBR(rect *MBR, rect *r){
 
 float deltaMBR(rect *MBR, rect *newRect){
 	//asumiendo que siempre x1<x2 e y2<y1
-	rect *newMBR = new(rect);
-	newMBR->x1=fminf(MBR->x1,newRect->x1);
-	newMBR->y1=fminf(MBR->y1,newRect->y1);
-	newMBR->x2=fmaxf(MBR->x2,newRect->x2);
-	newMBR->y2=fmaxf(MBR->y2,newRect->y2);
-	return area(newMBR)-area(MBR);
+	rect newMBR;
+	newMBR.x1=fminf(MBR->x1,newRect->x1);
+	newMBR.y1=fminf(MBR->y1,newRect->y1);
+	newMBR.x2=fmaxf(MBR->x2,newRect->x2);
+	newMBR.y2=fmaxf(MBR->y2,newRect->y2);
+	return area(&newMBR)-area(MBR);
 }
 
 rect *dupRect(rect *r){

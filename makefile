@@ -1,7 +1,7 @@
 CC=gcc
 DEPS = tarea1.h RTree.h rect.h
 
-_OBJ = RTree.o rect.o main.o 
+_OBJ = RTree.o rect.o main.o node.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 ODIR=obj

@@ -32,4 +32,6 @@ int main(){
     twoInts **resp;
     k = search(r, tree, resp);
     fprintf(stderr, "%d\n", k);
+
+	freeRTree(tree);
 }
