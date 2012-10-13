@@ -45,7 +45,6 @@ void selectRect2(nodeVal **values, int *imax, int *jmax){
 
 }
 
-
 insertVal *split(node *n, int leaf){
 	node *group1, *group2;
 	insertVal *ret;

@@ -10,7 +10,7 @@ char *path = "files";
 
 
 int getNextAdress(){
-	static n=0;
+	static int n=0;
 	return n++;
 }
 
@@ -21,6 +21,7 @@ node *makeNode(int leaf){
 	n->size=0;
     n->leaf = leaf;
 	n->MBR = NULL;
+    return n;
 }
 node *readNode(int address){
 	FILE *f;
