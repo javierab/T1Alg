@@ -210,6 +210,12 @@ insertVal *recInsert(node *n, nodeVal *val){
 void insert(RTree *t, nodeVal *val){
 	insertVal *ret;
 	node *n1, *n2, *n;
+	nodeVal *cpval = new(nodeVal);
+       	cpval->r = dupRect(val->r);
+       	cpval->child = val->child;
+       
+       	val = cpval;
+ 
 
 	if(t->root == NULL){
 		n = makeNode(TRUE);
