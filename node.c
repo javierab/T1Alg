@@ -16,11 +16,14 @@ int getNextAdress(){
 
 
 node *makeNode(int leaf){
+    int i;
 	node *n=new(node);
 	n->address = getNextAdress();
 	n->size=0;
     n->leaf = leaf;
 	n->MBR = NULL;
+    for(i = 0; i < 2*b+1; i++)
+        n->values[i]=NULL;
     return n;
 }
 node *readNode(int address){
@@ -42,6 +45,8 @@ node *readNode(int address){
 	n=new(node);
 	n->address=address;
 
+    for(i = 0; i < 2*b+1; i++)
+        n->values[i]=NULL;
 	//size,leaf
 	fscanf(f,"%d,%d", &size, &leaf);
 	n->leaf = leaf;
@@ -91,8 +96,9 @@ void writeNode(node *n){
 void freeNode(node *n){
 	int i;
 	if(n != NULL){
-		for(i=0; i<n->size; ++i)
+		for(i=0; i<n->size; ++i){
 			freeNodeVal(n->values[i]);
+        }
 		freeRect(n->MBR);
 		free(n);
 	}

@@ -14,7 +14,7 @@ all: tarea1
 tarea1: $(OBJ)
 	gcc -o $@ $^ -lm
 	mkdir -p files
-
+	rm files/*
 
 objdir:
 	mkdir -p obj

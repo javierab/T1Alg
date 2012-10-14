@@ -1,6 +1,6 @@
 #include "rect.h"
 
-#define b 1
+#define b 2
 #define B 4096
 
 

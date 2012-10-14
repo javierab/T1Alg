@@ -25,5 +25,5 @@ RTree *makeTree();
 void freeRTree(RTree *t);
 void insert(RTree *t, nodeVal *v);
 void freeNode(node *n);
-int search(rect *r, RTree *t, twoInts **resp);
+int search(rect *r, RTree *t, twoInts **resp, int size_resp);
 
