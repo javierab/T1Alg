@@ -282,6 +282,10 @@ int search(rect *r, RTree *t, twoInts **resp, int size_resp){
 void refreshMBR(node *n){
     int i;
     freeRect(n->MBR);
+	if(n->size==0){
+		n->MBR=makeRect(0,0,0,0);
+		return;
+	}
     n->MBR = dupRect(n->values[0]->r);
     for(i=1; i < n->size; ++i)
            increaseMBR(n->MBR, n->values[i]->r);
@@ -354,6 +358,22 @@ void underflow(node *n, node *n1, int i){
 int recDelete(rect *r, node *n, twoInts *pos){
     int i,j;
     node *n1, *n2;
+	if(n->leaf){ // si entra aca es porque la raiz es una hoja no se hace underflow, ya que se chequea despues
+		if(n->address==pos->int1){
+			freeNodeVal(n->values[pos->int2]);
+			for(j = pos->int2; j < n->size - 1; j++)
+				n->values[j] = n->values[j+1];
+			n->values[(n->size)-1]=NULL;
+			n->size--;
+			refreshMBR(n);
+			writeNode(n);
+			return TRUE;
+		}
+		else return FALSE;
+	}
+	
+	
+	
 
     for(i = 0; i < n->size; ++i)
         if(intersect(r, n->values[i]->r)){
@@ -504,11 +524,17 @@ void delete2(rect *r, RTree *t, twoInts *pos){
 
 void delete(rect *r, RTree *t, twoInts *pos){
     recDelete(r, t->root, pos);
-    if(t->root->size == 1){
+    if(t->root->size == 1 && !(t->root->leaf)){
         node *n = t->root;
         t->root = readNode(t->root->values[0]->child);
         destroyNode(n);
     }
+	if(t->root->size==0){
+		node *n=t->root;
+		destroyNode(n);
+		t->root=NULL;
+	}
+	
 }
 
 
