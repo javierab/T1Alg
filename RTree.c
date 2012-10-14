@@ -401,21 +401,14 @@ int recDelete(rect *r, node *n, int pos){
 
 void delete(rect *r, RTree *t, int pos){
 	int i;
+	recDelete(r, t->root, pos);
 	if(t->root->leaf){
-		for(i = 0; i < t->root->size; ++i){
-			if(t->root->values[i]->child==pos){
-				deleteValue(t->root, i);
-				writeNode(t->root);
-				break;
-			}
-		}
 		if(t->root->size==0){
 			destroyNode(t->root);
 			t->root=NULL;
 		}
 	}
 	else{
-		recDelete(r, t->root, pos);
 		if(t->root->size == 1){
 			node *n = t->root;
 			t->root = readNode(t->root->values[0]->child);
