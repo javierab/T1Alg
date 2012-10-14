@@ -389,7 +389,8 @@ int recDelete(rect *r, node *n, int pos){
             if(recDelete(r, n1, pos)){
                 if(n1->size < b )
                 	underflow(n, n1, i);
-                refreshMBR(n);
+                n->values[i]->r=dupRect(n1->MBR);
+				refreshMBR(n);
                 writeNode(n);
                 return TRUE;
             }
