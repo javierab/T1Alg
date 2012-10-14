@@ -4,6 +4,12 @@
 #include <math.h>
 #include "RTree.h"
 
+int insertMethod = 1;
+
+void setInsertMethod(int i){
+	insertMethod = i;
+}
+
 
 RTree *makeTree(){
 	return new(RTree);
@@ -51,7 +57,11 @@ insertVal *split(node *n, int leaf){
 	insertVal *ret;
     int imax, jmax, i,j;
 	rect *mbr1, *mbr2;
-    selectRect2(n->values, &imax, &jmax);
+
+	if(insertMethod == 1)
+		selectRect1(n->values, &imax, &jmax);
+	else
+		selectRect2(n->values, &imax, &jmax);
 
 
 	group1 = makeNode(leaf);
