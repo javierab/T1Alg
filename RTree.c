@@ -300,10 +300,6 @@ node *merge(node *n1, node *n2){
     }
         
     resp->size = n1->size + n2->size;
-    
-    for(i = 0; i < resp->size; i++){
-        fprintf(stderr, "values(%d) = %x\n\n", i, resp->values[i]);
-    }
     refreshMBR(resp);
     destroyNode(n1);
     destroyNode(n2);
@@ -386,6 +382,123 @@ int recDelete(rect *r, node *n, twoInts *pos){
             freeNode(n1);
         }
     return FALSE;
+    
+}
+
+void deleteValue(node *n, int i){
+    int j;
+    freeNodeVal(n->values[i]);
+    for(j = i; j < n->size - 1; j++)
+        n->values[j] = n->values[j+1];
+    n->values[(n->size)-1]=NULL;
+    n->size--;
+    refreshMBR(n);
+}
+
+
+void insertTree(node *n, RTree *t){
+    int i;
+    node *n1;
+
+    if(n->leaf){
+         for(i = 0; i < n->size; ++i){
+            nodeVal *val = new(nodeVal);
+            val->r = dupRect(n->values[i]->r);
+            val->child = n->values[i]->child;
+            insert(t, val);
+        }
+    }
+    else{
+        for(i = 0; i < n->size; ++i){
+            n1 = readNode(n->values[i]->child);
+            insertTree(n1, t);
+            destroyNode(n1);
+        }    
+    }
+}
+
+
+int recDelete2(rect *r, node *n, twoInts *pos, RTree *t){
+    int i,j;
+    node *n1, *n2;
+    
+    if(n->leaf){
+
+        if(n->address == pos->int1){
+            deleteValue(n, pos->int2);
+            writeNode(n);
+            if(n->size < b){
+                return TRUE;
+
+            }
+        }
+        return FALSE;
+    }
+    
+    
+
+    for(i = 0; i < n->size; ++i){
+        if(intersect(r, n->values[i]->r)){
+            n1 = readNode(n->values[i]->child);
+            if(recDelete2(r, n1, pos, t)){
+
+                if(n->size - 1 > b){
+                    insertTree(n1, t);
+                    destroyNode(n1);
+                }
+                else{
+                    freeNode(n1);
+                    return TRUE;
+                }
+            }
+        }
+    }
+    refreshMBR(n);
+    writeNode(n);
+    return FALSE;
+
+}
+
+void delete2(rect *r, RTree *t, twoInts *pos){
+    int i;
+    node *n = t->root, *n1;
+    if(n->leaf){
+        if(n->address == pos->int1){
+            deleteValue(n, pos->int2);
+            if(n1->size == 0){
+                t->root = NULL;
+                destroyNode(n);
+                return;
+            }
+            writeNode(n);
+        }
+        return;
+    }
+    
+    for(i = 0; i < n->size; ++i){
+        int s = 0;
+        if(intersect(r, n->values[i]->r)){
+            n1 = readNode(n->values[i]->child);
+            if(recDelete2(r, n1, pos, t)){
+                
+                if(n->size - 1 == 1){
+                    if(i == 0) s = 1;
+                    t->root = readNode(n->values[s]->child);
+                    destroyNode(n);
+                }
+                else
+                    deleteValue(t->root, i);
+                insertTree(n1, t);
+                destroyNode(n1);
+    
+            }
+            else
+                freeNode(n1);
+            
+        }
+    }
+    refreshMBR(t->root);
+    writeNode(t->root);
     
 }
 

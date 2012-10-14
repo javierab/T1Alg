@@ -98,6 +98,7 @@ void freeNode(node *n){
 	if(n != NULL){
 		for(i=0; i<n->size; ++i){
 			freeNodeVal(n->values[i]);
+
         }
 		freeRect(n->MBR);
 		free(n);
@@ -110,6 +111,7 @@ void destroyNode(node *n){
 	unlink(filename);
 	freeNode(n);
 }
+
 
 void freeNodeVal(nodeVal *v){
 	if(v != NULL){

@@ -66,7 +66,6 @@ int main(){
     insert(tree, val5);
     insert(tree, val6);
     insert(tree, val7);
-    fprintf(stderr, "---------------- pase el 7 ----------\n");
     
     insert(tree, val0);
     insert(tree, val8);
@@ -81,11 +80,16 @@ int main(){
     int size_resp = 100;
     twoInts **resp= (twoInts **) malloc(size_resp * sizeof(twoInts *)); 
     k = search(r, tree, resp, size_resp);
-    //delete(r, tree, resp[7]);
-    //delete(r, tree, resp[8]);
-    //delete(r, tree, resp[5]);
-    //delete(r, tree, resp[5]);
+    delete2(r, tree, resp[7]);
+    twoInts *del = new(twoInts);
+    del->int1 = 7;
+    del->int2 = 0;
+    delete2(r, tree, del);
+    //delete2(r, tree, resp[5]);
+    //delete2(r, tree, resp[5]);
 
 
 	freeRTree(tree);
+    
+    fprintf(stderr, "OH MI DIOS! corre sin segfault <3 <3\n\n");
 }
