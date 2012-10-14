@@ -26,7 +26,7 @@ void selectRect1(nodeVal **values, int *imax, int *jmax){
                 max_area = area(mbr);
                 *imax = i, *jmax = j;
             }
-            freeRect(mbr);   
+            freeRect(mbr);
         }
     }
 }
@@ -40,7 +40,7 @@ void selectRect2(nodeVal **values, int *imax, int *jmax){
                 max_dist = d;
                 *imax = i, *jmax = j;
             }
-                
+
         }
     }
 
@@ -118,10 +118,10 @@ insertVal *split(node *n, int leaf){
 		}
     }
 
-	ret = new(insertVal);	
+	ret = new(insertVal);
 	ret->node1 = group1;
 	ret->node2 = group2;
-	
+
 	destroyNode(n);
 	writeNode(group1);
 	writeNode(group2);
@@ -146,7 +146,7 @@ insertVal *recInsert(node *n, nodeVal *val){
 			writeNode(n);
 			ret = new(insertVal);
 			ret->node1 = n;
-			ret->node2 = NULL;	
+			ret->node2 = NULL;
 		}
 		else{
 
@@ -168,9 +168,9 @@ insertVal *recInsert(node *n, nodeVal *val){
 			}
 			else if(mbr == min && (area(r)+mbr)<amin){
 				imin=i;
-				amin = area(r)+mbr;				
+				amin = area(r)+mbr;
 			}
-			
+
 		}
         
         increaseMBR(n->MBR, val->r);
@@ -193,7 +193,7 @@ insertVal *recInsert(node *n, nodeVal *val){
 		//Si no hubo overflow en el hijo o no hay overflow aquí.
 		if(n2 == NULL || n->size <= 2*b){
 			writeNode(n);
-			ret = new(insertVal);			
+			ret = new(insertVal);
 			ret->node1 = n;
 			ret->node2 = NULL;
 		}
@@ -260,7 +260,7 @@ void recSearch(rect *r, node *n, twoInts **resp, int *offset, int size_resp){
                 twoints->int2 = i;
                 if(*offset == size_resp)
                     size_resp = dupResp(resp, size_resp);
-                resp[(*offset)++] = twoints; 
+                resp[(*offset)++] = twoints;
                 fprintf(stderr,"Intersecta con: %d,%d\n\n", resp[(*offset)-1]->int1, resp[(*offset)-1]->int2);
             }
         }
@@ -339,9 +339,9 @@ void underflow(node *n, node *n1, int i){
             n->values[i]->r = dupRect(n1->MBR);
             freeRect(n->values[sibling]->r);
             n->values[sibling]->r = dupRect(n2->MBR);
-                            
+
             writeNode(n);writeNode(n1);writeNode(n2);
-                            
+
         }
         else{
             n2 = merge(n1,n2);
@@ -350,7 +350,7 @@ void underflow(node *n, node *n1, int i){
             for(j = sibling; j < n->size - 1; j++)
                 n->values[j] = n->values[j+1];
             n->size--;
-            n->values[n->size]= NULL;            
+            n->values[n->size]= NULL;
             writeNode(n2);
         }
     }
@@ -377,9 +377,9 @@ int recDelete(rect *r, node *n, twoInts *pos){
 		}
 		else return FALSE;
 	}
-	
-	
-	
+
+
+
 
     for(i = 0; i < n->size; ++i)
         if(intersect(r, n->values[i]->r)){
@@ -439,7 +439,7 @@ void insertTree(node *n, RTree *t){
             n1 = readNode(n->values[i]->child);
             insertTree(n1, t);
             destroyNode(n1);
-        }    
+        }
     }
 }
 
@@ -460,8 +460,8 @@ int recDelete2(rect *r, node *n, twoInts *pos, RTree *t){
         }
         return FALSE;
     }
-    
-    
+
+
 
     for(i = 0; i < n->size; ++i){
         if(intersect(r, n->values[i]->r)){
@@ -500,13 +500,13 @@ void delete2(rect *r, RTree *t, twoInts *pos){
         }
         return;
     }
-    
+
     for(i = 0; i < n->size; ++i){
         int s = 0;
         if(intersect(r, n->values[i]->r)){
             n1 = readNode(n->values[i]->child);
             if(recDelete2(r, n1, pos, t)){
-                
+
                 if(n->size - 1 == 1){
                     if(i == 0) s = 1;
                     t->root = readNode(n->values[s]->child);
@@ -516,11 +516,11 @@ void delete2(rect *r, RTree *t, twoInts *pos){
                     deleteValue(t->root, i);
                 insertTree(n1, t);
                 destroyNode(n1);
-    
+
             }
             else
                 freeNode(n1);
-            
+
         }
     }
     refreshMBR(t->root);
@@ -540,7 +540,7 @@ void delete(rect *r, RTree *t, twoInts *pos){
 		destroyNode(n);
 		t->root=NULL;
 	}
-	
+
 }
 
 
