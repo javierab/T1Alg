@@ -247,27 +247,22 @@ void insert(RTree *t, nodeVal *val){
 	}
 }
 
-
-
-int dupResp(twoInts **resp, int size_resp){
+int dupResp(int **resp, int size_resp){
     size_resp <<= 1;
-    resp = (twoInts **) realloc(resp,size_resp*sizeof(twoInts *));
+    *resp = (int *) realloc(*resp,size_resp*sizeof(int));
     return size_resp;
 }
 
-void recSearch(rect *r, node *n, twoInts **resp, int *offset, int size_resp){
+void recSearch(rect *r, node *n, int **resp, int *offset, int size_resp){
     int i;
     node *n1;
     if(n->leaf){
         for(i = 0; i < n->size; ++i){
             if(intersect(r, n->values[i]->r)){
-                twoInts *twoints = new(twoInts);
-                twoints->int1 = n->address;
-                twoints->int2 = i;
                 if(*offset == size_resp)
                     size_resp = dupResp(resp, size_resp);
-                resp[(*offset)++] = twoints;
-                fprintf(stderr,"Intersecta con: %d,%d\n\n", resp[(*offset)-1]->int1, resp[(*offset)-1]->int2);
+                (*resp)[(*offset)++] = n->values[i]->child;
+                fprintf(stderr, "Intersecta con: %d\n", (*resp)[(*offset)-1]);
             }
         }
         return;
@@ -281,13 +276,14 @@ void recSearch(rect *r, node *n, twoInts **resp, int *offset, int size_resp){
         }
 }
 
-int search(rect *r, RTree *t, twoInts **resp, int size_resp){
+int search(rect *r, RTree *t, int **resp){
     int offset = 0;
+    int size_resp = 100;
+    *resp= (int *) malloc(size_resp * sizeof(int));
     if(t->root == NULL)
         return 0;
     int i;
     recSearch(r, t->root, resp, &offset, size_resp);
-
     return offset;
 }
 
@@ -328,94 +324,39 @@ void underflow(node *n, node *n1, int i){
     int j, sibling;
     node *n2;
     
-    if(n1->size < b ){
-        if(n->size == i + 1){
-            n2 = readNode(n->values[i-1]->child);
-            sibling = i-1;
-        }
-        else{
-            n2 = readNode(n->values[i+1]->child);
-            sibling = i+1;
-        }
-        if(n2->size > b){
-            n1->values[n1->size++] = n2->values[--(n2->size)];
-            refreshMBR(n1);
-            refreshMBR(n2);
-            freeRect(n->values[i]->r);
-            n->values[i]->r = dupRect(n1->MBR);
-            freeRect(n->values[sibling]->r);
-            n->values[sibling]->r = dupRect(n2->MBR);
-
-            writeNode(n);writeNode(n1);writeNode(n2);
-
-        }
-        else{
-            n2 = merge(n1,n2);
-            n->values[i]->child = n2->address;
-            freeNodeVal(n->values[sibling]);
-            for(j = sibling; j < n->size - 1; j++)
-                n->values[j] = n->values[j+1];
-            n->size--;
-            n->values[n->size]= NULL;
-            writeNode(n2);
-        }
-    }
-}
-
-
-
-
-
-
-int recDelete(rect *r, node *n, twoInts *pos){
-    int i,j;
-    node *n1, *n2;
-	if(n->leaf){ // si entra aca es porque la raiz es una hoja no se hace underflow, ya que se chequea despues
-		if(n->address==pos->int1){
-			freeNodeVal(n->values[pos->int2]);
-			for(j = pos->int2; j < n->size - 1; j++)
-				n->values[j] = n->values[j+1];
-			n->values[(n->size)-1]=NULL;
-			n->size--;
-			refreshMBR(n);
-			writeNode(n);
-			return TRUE;
-		}
-		else return FALSE;
+	if(n->size == i + 1){
+		n2 = readNode(n->values[i-1]->child);
+		sibling = i-1;
 	}
+	else{
+		n2 = readNode(n->values[i+1]->child);
+		sibling = i+1;
+	}
+	if(n2->size > b){
+		n1->values[n1->size++] = n2->values[--(n2->size)];
+		refreshMBR(n1);
+		refreshMBR(n2);
+		freeRect(n->values[i]->r);
+		n->values[i]->r = dupRect(n1->MBR);
+		freeRect(n->values[sibling]->r);
+		n->values[sibling]->r = dupRect(n2->MBR);
 
+		writeNode(n);writeNode(n1);writeNode(n2);
 
-
-
-    for(i = 0; i < n->size; ++i)
-        if(intersect(r, n->values[i]->r)){
-            n1 = readNode(n->values[i]->child);
-            if(n1->leaf){
-                if(n1->address == pos->int1){
-                    freeNodeVal(n1->values[pos->int2]);
-                    for(j = pos->int2; j < n1->size - 1; j++)
-                        n1->values[j] = n1->values[j+1];
-                    n1->values[(n->size)-1]=NULL;
-                    n1->size--;
-                    underflow(n, n1, i);
-                    refreshMBR(n);
-                    writeNode(n);
-                    return TRUE;
-                }
-            }
-            else{
-                if(recDelete(r, n1, pos)){
-                    underflow(n, n1, i);
-                    refreshMBR(n);
-                    writeNode(n);
-                    return TRUE;
-                }
-            }
-            freeNode(n1);
-        }
-    return FALSE;
-    
+	}
+	else{
+		n2 = merge(n1,n2);
+		n->values[i]->child = n2->address;
+		freeNodeVal(n->values[sibling]);
+		for(j = sibling; j < n->size - 1; j++)
+			n->values[j] = n->values[j+1];
+		n->size--;
+		n->values[n->size]= NULL;
+		writeNode(n2);
+	}
 }
+
+
 
 void deleteValue(node *n, int i){
     int j;
@@ -426,6 +367,65 @@ void deleteValue(node *n, int i){
     n->size--;
     refreshMBR(n);
 }
+
+
+int recDelete(rect *r, node *n, int pos){
+    int i,j;
+    node *n1, *n2;
+
+    if(n->leaf){
+    	for(i = 0; i < n->size; ++i)
+    		if(n->values[i]->child == pos){
+            	deleteValue(n, i);
+            	writeNode(n);
+    			return TRUE;
+    		}
+    	return FALSE;
+    }
+
+    for(i = 0; i < n->size; ++i)
+        if(intersect(r, n->values[i]->r)){
+            n1 = readNode(n->values[i]->child);
+            if(recDelete(r, n1, pos)){
+                if(n1->size < b )
+                	underflow(n, n1, i);
+                refreshMBR(n);
+                writeNode(n);
+                return TRUE;
+            }
+            freeNode(n1);
+        }
+    return FALSE;
+    
+}
+
+void delete(rect *r, RTree *t, int pos){
+	int i;
+	if(t->root->leaf){
+		for(i = 0; i < t->root->size; ++i){
+			if(t->root->values[i]->child==pos){
+				deleteValue(t->root, i);
+				writeNode(t->root);
+				break;
+			}
+		}
+		if(t->root->size==0){
+			destroyNode(t->root);
+			t->root=NULL;
+		}
+	}
+	else{
+		recDelete(r, t->root, pos);
+		if(t->root->size == 1){
+			node *n = t->root;
+			t->root = readNode(t->root->values[0]->child);
+			destroyNode(n);
+		}
+	}
+
+}
+
+
 
 
 void insertTree(node *n, RTree *t){
@@ -534,20 +534,7 @@ void delete2(rect *r, RTree *t, twoInts *pos){
     
 }
 
-void delete(rect *r, RTree *t, twoInts *pos){
-    recDelete(r, t->root, pos);
-    if(t->root->size == 1 && !(t->root->leaf)){
-        node *n = t->root;
-        t->root = readNode(t->root->values[0]->child);
-        destroyNode(n);
-    }
-	if(t->root->size==0){
-		node *n=t->root;
-		destroyNode(n);
-		t->root=NULL;
-	}
 
-}
 
 
 
