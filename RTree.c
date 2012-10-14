@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <math.h>
 #include "RTree.h"
 
 
@@ -66,11 +67,17 @@ insertVal *split(node *n, int leaf){
 
 	float dif=0, maxdif=0;
 	int idif, count1 = 1, count2 = 1;
+	float delta1, delta2;
 	while(count1 < b+1 && count2 < b+1){
         maxdif = 0, idif = 0;
 		for (i=0;i<2*b+1;i++){
 			if(n->values[i]!=NULL){
-				dif=abs(deltaMBR(group1->MBR,n->values[i]->r)-deltaMBR(group2->MBR,n->values[i]->r));
+				delta1 = deltaMBR(group1->MBR,n->values[i]->r);
+				delta2 = deltaMBR(group2->MBR,n->values[i]->r);
+				if(delta1 < delta2)
+					dif = delta2-delta1;
+				else
+					dif = delta1-delta2;
 				if(dif>=maxdif)
                     maxdif = dif, idif=i;
 			}
@@ -148,9 +155,8 @@ insertVal *recInsert(node *n, nodeVal *val){
 		return ret;
 	}
 	else{
-
-		int min = 1 << 20, imin,mbr;
-		float amin;
+		int imin = -1;
+		float min = HUGE_VAL, amin,mbr;
 		int i;
 		for(i = 0; i < n->size; i++){
 			r = n->values[i]->r;
