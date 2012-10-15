@@ -30,12 +30,13 @@
 	
 \textbf{M\'etodo 1:} Consiste en verificar hasta d\'onde la eliminaci\'on hace \emph{underflow} en los padres y borrar esos nodos, y luego reinsertar todos los rect\'angulos que quedan hu\'erfanos en el camino.
 
-\textbf{M\'etodo 2:} Consiste en verificar si el hermano puede donar un rect\'angulo ---posible si es que tiene m\'as de $b$ elementos. Si no, se une el hermano y el nodo actual 
+\textbf{M\'etodo 2:} Consiste en verificar si el hermano puede donar un rect\'angulo ---posible si es que tiene m\'as de $b$ elementos. Si no, se une el hermano y el nodo actual, generando un nodo de $2b-1$ elementos, y actualizando este nodo menos hacia arriba. En ambos casos se actualizan los MBRs hacia arriba.
+
 \section{Hip\'otesis}
 %%%%%%%%%%NO TENGO IDEA CUALES SON LOS ESPERADOS XD HAY QUE COMPLETAR ACA%%%%%%%%%%%%%%
 	Se espera que las operaciones en la implementaci\'on del R-Tree tarden tiempos acordes a aquellos calculados te\'oricamente para esta estructura de datos.
 	 
-	 \textbf{Inserci\'on:} Consistir\'a, primero, en un recorrido en altura del \'arbol visitando los rect\'angulos de cada nodo, que toman en promedio $\mathcal{O}(1)$. Dependiendo del m\'etodo que se utilice en caso de \emph{overflow}, se tendr\'a que el costo total de la inserci\'on ser\'a $\mathcal{O}(1)$ con el primer m\'etodo, y $\mathcal{O}(1)$ con el segundo m\'etodo.
+\textbf{Inserci\'on:} Consistir\'a, primero, en un recorrido en altura del \'arbol visitando los rect\'angulos de cada nodo, que toman en promedio $\mathcal{O}(1)$. Dependiendo del m\'etodo que se utilice en caso de \emph{overflow}, se tendr\'a que el costo total de la inserci\'on ser\'a $\mathcal{O}(1)$ con el primer m\'etodo, y $\mathcal{O}(1)$ con el segundo m\'etodo.
 	
 \textbf{B\'usqueda:} Consiste en recorrer el \'arbol por todos aquellos caminos que intersecten con el rect\'angulo buscado. As\'i, se tiene que en el peor caso se visitan todos los rect\'angulos de cada nodo, obteniendo $\mathcal{O}(1)$, con un promedio de $\mathcal{O}(1)$.
 
@@ -50,10 +51,12 @@ Finalmente, se espera un escalamiento estasble respecto al orden de los algoritm
 El lenguaje utilizado para desarrollar la estructura de datos y sus algoritmos fue C. Para ello, se dividi\'o el proyecto en varias partes y sub-estructuras. Se incluyen en esta entrega los archivos que implementan los algoritmos, los archivos con las estructuras de datos, ejemplos de prueba y un \emph{Makefile} para compilar todo.
 
 \subsection{Generaci\'on de Instancias y Metodolog\'ia}
-
-%%%%%%%%esto es lo de la tefa. no sé que decir %%%%%%%%%%%%
-
+	Para probar los algoritmos se generaron rect\'angulos con datos aleatorios cuyas coordenadas estuviesen entre $0$ y $500000$, y tama\~no de cada lada entre $0$ y $100$. Para asegurar una buena distribuci\'on se utiliza el m\'etodo \texttt{drand48()}, que entrega un valor flotante de doble precisi\'on entre 0 y 1 con distribuci\'on uniforme, calculando primero $x_1$ y $y_1$ entre $0$ y $500000$, luego calculando el tama\~no del lado, uniforme entre $0$ y $99$, y a partir de eso $x_2$ y $y_2$, verificando que est\'e dentro del rango solicitado.
+	Para insertar y buscar, simplemente se genera un rect\'angulo y se inserta o se busca en el \'arbol. En cambio, para el borrado, se va accediendo por posiciones aleatorias $j$ del nodo desde la ra\'iz hasta llegar a una hoja, recalculando el $j$ en cada paso: entonces se borra el elemento en la posici\'on $j$ del nodo. Con esto se asegura que existe el elemento a borrar y se obtiene la informaci\'on del nodo.
+	
+	
 \subsection{Determinaci\'on de Par\'ametros}
+
 Resulta necesario calcular el valor que debe tomar $b$ para cumplir las caracter\'isticas pedidas en el enunciado. Para ello debemos analizar las estructuras de datos utilizadas en la implementaci\'on.
 \begin{verbatim}
 typedef struct{
@@ -63,6 +66,7 @@ typedef struct{
         float y2;
 }rect;
 \end{verbatim}
+
 Es f\'acil ver que al ser un rect\'angulo simplemente cuatro floats, su tama\~no ser\'a de $16B$.
 \begin{verbatim}
 typedef struct{
@@ -70,6 +74,7 @@ typedef struct{
         int child;
 }nodeVal;
 \end{verbatim}
+
 En el caso de esta estructura, veremos que contiene un puntero a un rect\'angulo (que ya sabemos es de tama\~no $16B$ y un int, de $4B$, obteniendo as\'i un tama\~no de $20B$. 
 \begin{verbatim}
 typedef struct{
@@ -80,19 +85,22 @@ typedef struct{
         int leaf;
 }node;
 \end{verbatim}
-Ahora finalmente podemos considerar aquello que nos interesa, que es el nodo. Tenemos que se compone de 3 enteros ($12B$), un \texttt{rect} ($16B$) y $b+1$ \texttt{nodeVal}s, que corresponden a $(2b+1)*20B$, resultando en que el tama\~no total debe ser $28 + 20(b+1)B$.
+
+Ahora finalmente podemos considerar aquello que nos interesa, que es el nodo. Tenemos que se compone de 2 enteros (pues \texttt{address} no se guarda en disco: es el nombre del archivo), un \texttt{rect} ($16B$) y $b$ \texttt{nodeVal}s, que corresponden a $2b*20B$, resultando en que el tama\~no total debe ser $24 + 40bB$.
 Se debe determinar ahora el tama\~no de p\'agina del disco. Para ello, se utiliza el comando \texttt{sysconf(\_SC\_PAGESIZE)}, que nos arroja como resultado un tama\~no de $4096$ bytes.
-Despejando entonces $b$, se obtiene que el $b$ a utilizar debe ser aproximadamente $200$.
+Despejando, se obtiene que el $b$ a utilizar debe ser aproximadamente $100$.
 %%esto esta malo creo D: de ahi me dicen como calcularon%%
 
 \subsection{Experimentaci\'on con Par\'ametros Fijos}
 Una vez determinados los par\'ametros a utilizar, se procedi\'o a realizar ejecuciones de \'estos utilizando distintas cantidades de elementos generados aleatoriamente. Tal como se pide en el enunciado, se utiliz\'o $n \in \{2^9, 2^{12}, 2^{15},...,2^{27}\}$ y $k \in \{1,3,7\}$, manteniendo as\'i fijo $m = n/(2k)$ intercalando las operaciones de inserci\'on, b\'usqueda y borrado. Se utilizaron las secuencias $i^{km}f^{km}$ para determinar la mejor inserci\'on, $(i^kd^ki^k)^mf^{km}$ para determinar el mejor borrado, y finalmente $(idi)^{km}f^{km}(did)^{km}$ para probar la estructura de datos completa con todas las operaciones.
+Los par\'ametros que se midieron en cada experimento fueron dos: el tiempo por cada secuencia de operaciones tomada, utilizando el comando \texttt{time} para obtener tiempo de sistema, de usuario y real, y se midieron la cantidad de accesos a p\'aginas de disco, medido cada vez que se abre un nodo a memoria principal o se escribe a disco.
 
 \subsubsection{Dificultades de Experimentaci\'on}
+
 \begin{itemize}
-\item La primera dificultad surgi\'o al terminar el desarrollo y comenzar la generaci\'on de rect\'angulos aleatorios, obteni\'endose casos que no se hab\'ian considerado y que ilustraron errores de implementaci\'on que no se hab\'ian detectado antes.
-\item Se encontraron problemas de dise\~no en la escritura de archivos, puesto que los valores no se escrib\'ian como enteros (en representaci\'on binaria), si no que como \texttt{char[]}, lo que hac\'ia mucho m\'as lenta la escritura y lectura. Al solucionar este problema se redujeron los tiempos a aproximadamente la mitad.
-\item Inicialmente se tomaron pruebas tomando $10$ muestras de cada combinaci\'on de $k$ y $n$, lo cual r\'apidamente condujo a que los algoritmos corrieran demasiado tiempo (en $2^{18}$ se corri\'o la prueba por m\'as de 8 horas sin terminar), por lo que se redujeron las muestras a $5$ y posteriormente a $2$ seg\'un el crecimiento del $n$.
+	\item La primera dificultad surgi\'o al terminar el desarrollo y comenzar la generaci\'on de rect\'angulos aleatorios, obteni\'endose casos que no se hab\'ian considerado y que ilustraron errores de implementaci\'on que no se hab\'ian detectado antes.
+	\item Se encontraron problemas de dise\~no en la escritura de archivos, puesto que los valores no se escrib\'ian como enteros (en representaci\'on binaria), si no que como \texttt{char[]}, lo que hac\'ia mucho m\'as lenta la escritura y lectura. Al solucionar este problema se redujeron los tiempos a aproximadamente la mitad.
+	\item Inicialmente se tomaron pruebas tomando $10$ muestras de cada combinaci\'on de $k$ y $n$, lo cual r\'apidamente condujo a que los algoritmos corrieran demasiado tiempo (en $2^{18}$ se corri\'o la prueba por m\'as de 8 horas sin terminar), por lo que se redujeron las muestras a $5$ y posteriormente a $2$ seg\'un el crecimiento del $n$.
 \end{itemize}
 
 \subsubsection{Descripci\'on del Hardware Utilizado}
