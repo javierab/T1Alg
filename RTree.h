@@ -26,4 +26,5 @@ void freeRTree(RTree *t);
 void insert(RTree *t, nodeVal *v);
 void freeNode(node *n);
 int search(rect *r, RTree *t, int **resp);
+void setInsertMethod(int i);
 
