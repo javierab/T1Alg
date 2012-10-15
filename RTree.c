@@ -474,21 +474,20 @@ void insertTree(node *n, RTree *t){
     }
 }
 
-
-int recDelete2(rect *r, node *n, twoInts *pos, RTree *t){
+int recDelete2(rect *r, node *n, int pos, RTree *t){
     int i,j;
     node *n1, *n2;
 
     if(n->leaf){
+		for(i=0;i<n->size;i++)
+			if(n->values[i]->child==pos){
+				deleteValue(n, i);
+				writeNode(n);
+				if(n->size < b){
+					return TRUE;
 
-        if(n->address == pos->int1){
-            deleteValue(n, pos->int2);
-            writeNode(n);
-            if(n->size < b){
-                return TRUE;
-
-            }
-        }
+				}
+			}
         return FALSE;
     }
 
@@ -516,20 +515,21 @@ int recDelete2(rect *r, node *n, twoInts *pos, RTree *t){
 
 }
 
-void delete2(rect *r, RTree *t, twoInts *pos){
+void delete2(rect *r, RTree *t, int pos){
     int i;
     node *n = t->root, *n1;
     if(n->leaf){
-        if(n->address == pos->int1){
-            deleteValue(n, pos->int2);
-            if(n1->size == 0){
-                t->root = NULL;
-                destroyNode(n);
-                return;
-            }
-            writeNode(n);
-        }
-        return;
+		for (i=0; i<n->size; i++)
+			if(n->values[i]->child == pos)
+				deleteValue(n, i);
+		if(n->size == 0){
+			t->root = NULL;
+            destroyNode(n);
+			return;
+		}
+		refreshMBR(n);
+	writeNode(n);
+	return;
     }
 
     for(i = 0; i < n->size; ++i){
@@ -537,11 +537,10 @@ void delete2(rect *r, RTree *t, twoInts *pos){
         if(intersect(r, n->values[i]->r)){
             n1 = readNode(n->values[i]->child);
             if(recDelete2(r, n1, pos, t)){
-
                 if(n->size - 1 == 1){
                     if(i == 0) s = 1;
                     t->root = readNode(n->values[s]->child);
-                    destroyNode(n);
+					destroyNode(n);
                 }
                 else
                     deleteValue(t->root, i);
@@ -551,9 +550,9 @@ void delete2(rect *r, RTree *t, twoInts *pos){
             }
             else
                 freeNode(n1);
-
         }
-    }
+		n=t->root;
+	}
     refreshMBR(t->root);
     writeNode(t->root);
 
