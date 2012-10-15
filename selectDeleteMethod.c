@@ -86,9 +86,9 @@ int main(int argc, char *argv[]){
 	time_t ini;
 	time_t fin;
 
-	printf("********\n");
+	printf("*********\n");
 	printf("n = %d\n",nTotal);
-	printf("********\n\n");
+	printf("*********\n\n");
 
 
 

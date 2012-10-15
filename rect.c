@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "rect.h"
-#define new(X) (X *)malloc(sizeof(X))
 
 rect *makeRect(float x1, float y1, float x2, float y2){
 	rect *r = new(rect);
@@ -32,7 +31,7 @@ void freeRect(rect *r){
 }
 
 float area(rect *r){
-	return abs(r->x2 - r->x1)*abs(r->y2 - r->y1);
+	return (r->x2 - r->x1)*(r->y2 - r->y1);
 }
 
 void printRect(rect *r){

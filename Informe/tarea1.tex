@@ -1,0 +1,106 @@
+\documentclass[12pt,spanish]{article}
+\usepackage[T1]{fontenc}
+\usepackage[all]{xy}
+\usepackage[spanish]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\topmargin = 10pt
+\title{Tarea 1 CC4102 \\ Implementaci\'on y Experimentaci\'on de R-Trees en Memoria Secundaria}
+\author{Javiera Born\\ Nicol\'as Lehmann \\ Estefan\'ia Vidal}
+\date{15 de Octubre de 2012}
+\begin{document}
+\vspace{-1cm}
+\hoffset = 0pt
+\maketitle
+\section{Descripci\'on del Problema}
+	En la primera tarea del curso se busca implementar un R-Tree en memoria secundaria. Esta estructura consta de nodos que contienen, dado un par\'ametro \emph{b}, entre $b$ y $2b$ rect\'angulos en cada nodo, correspondiendo cada nodo con una p\'agina de disco, con el fin de minimizar las visitas a los nodos al realizar operaciones. Se busca que la estructura almacene los rect\'angulos que representan datos reales en las hojas, y los llamados \emph{Minimum Bounding Rectangles (MBRs)}, rect\'angulos que acotan de manera m\'inima a aquellos de nivel inferior, de los rect\'angulos de estos nodos almacenados hacia arriba, llegando hasta la ra\'iz. En estos \'arboles se tendr\'an tres operaciones:
+	
+\subsection{Inserci\'on}
+	La inserci\'on consiste en agregar un nuevo rect\'angulo al R-Tree. Si hay espacio disponible en el nodo correspondiente donde realizar la inserci\'on, es decir, hay menos de $2b$ rect\'angulos, entonces s\'olo se inserta y actualizan los MBRs. En caso contrario, se realiza la operaci\'on \emph{split}, que separar\'a el nodo en dos nodos, de tama\~nos $b$ y $b+1$: para ello se determinan dos rect\'angulos que estar\'an uno en cada nodo, y luego se verifica, entre todos los restantes, cu\'al agranda menos el MBR de alguno de los dos, y se agrega a ese grupo, iterando hasta que se agregan todos. Se utilizan dos m\'etodos para encontrar los primeros rect\'angulos:
+
+\textbf{M\'etodo 1:} Consiste en tomar todos los pares de rect\'angulos, y ver cu\'al genera el MBR con el \'area m\'axima.
+
+\textbf{M\'etodo 2:} Consiste en tomar todos los pares de rect\'angulos, y ver cu\'al tiene una mayor distancia.
+
+\subsection{B\'usqueda}
+	Para la b\'usqueda simplemente se recorre el \'arbol viendo los MBRs que intersectan con el rect\'angulo buscado, llegando hasta la ra\'iz, donde se encuentran aquellos que efectivamente insersectan.
+	
+\subsection{Borrado}
+	El borrado elimina un rect\'angulo identificado por la hoja en que est\'a. An\'alogamente a la inserci\'on, puede eliminarse si todav\'ia quedan $b$ elementos en el nodo, pero si hay menos entonces se debe utilizar un m\'etodo para ajustar los nodos para que cumplan la estructura del R-Tree.
+	
+\textbf{M\'etodo 1:} Consiste en verificar hasta d\'onde la eliminaci\'on hace \emph{underflow} en los padres y borrar esos nodos, y luego reinsertar todos los rect\'angulos que quedan hu\'erfanos en el camino.
+
+\textbf{M\'etodo 2:} Consiste en verificar si el hermano puede donar un rect\'angulo ---posible si es que tiene m\'as de $b$ elementos. Si no, se une el hermano y el nodo actual 
+\section{Hip\'otesis}
+%%%%%%%%%%NO TENGO IDEA CUALES SON LOS ESPERADOS XD HAY QUE COMPLETAR ACA%%%%%%%%%%%%%%
+	Se espera que las operaciones en la implementaci\'on del R-Tree tarden tiempos acordes a aquellos calculados te\'oricamente para esta estructura de datos.
+	 
+	 \textbf{Inserci\'on:} Consistir\'a, primero, en un recorrido en altura del \'arbol visitando los rect\'angulos de cada nodo, que toman en promedio $\mathcal{O}(1)$. Dependiendo del m\'etodo que se utilice en caso de \emph{overflow}, se tendr\'a que el costo total de la inserci\'on ser\'a $\mathcal{O}(1)$ con el primer m\'etodo, y $\mathcal{O}(1)$ con el segundo m\'etodo.
+	
+\textbf{B\'usqueda:} Consiste en recorrer el \'arbol por todos aquellos caminos que intersecten con el rect\'angulo buscado. As\'i, se tiene que en el peor caso se visitan todos los rect\'angulos de cada nodo, obteniendo $\mathcal{O}(1)$, con un promedio de $\mathcal{O}(1)$.
+
+\textbf{Borrado:} En este caso primero buscamos el elemento, y luego se utizar\'a alguno de los dos m\'etodos para lidiar con el \emph{underflow}. En el primer caso tendremos $\mathcal{O}(1)$, dado que subiremos y luego reinsertaremos los elementos de el sub\'arbol correspondiente, y en el segundo caso se tiene $\mathcal{O}(1)$.
+
+Se espera tambi\'en observar un \emph{overhead} en las operaciones de inserci\'on y borrado, debido a la modificaci\'on cont\'inua de archivos por parte del algoritmo: esta interacci\'on con el sistema de archivos deber\'ia traer un costo asociado.
+
+%% decir algo de memoria secundaria, esto es un chamullo
+Finalmente, se espera un escalamiento estasble respecto al orden de los algoritmos, pues la optimalidad te\'orica de los par\'ametros de cada uno no se basa en el n\'umero de elementos con los que se trata, sino que en par\'ametros de la unidad de almacenamiento secundario y del tama\~no de la memoria principal.
+
+\section{Dise\~no Experimental}
+El lenguaje utilizado para desarrollar la estructura de datos y sus algoritmos fue C. Para ello, se dividi\'o el proyecto en varias partes y sub-estructuras. Se incluyen en esta entrega los archivos que implementan los algoritmos, los archivos con las estructuras de datos, ejemplos de prueba y un \emph{Makefile} para compilar todo.
+
+\subsection{Generaci\'on de Instancias y Metodolog\'ia}
+
+%%%%%%%%esto es lo de la tefa. no sé que decir %%%%%%%%%%%%
+
+\subsection{Determinaci\'on de Par\'ametros}
+Resulta necesario calcular el valor que debe tomar $b$ para cumplir las caracter\'isticas pedidas en el enunciado. Para ello debemos analizar las estructuras de datos utilizadas en la implementaci\'on.
+\begin{verbatim}
+typedef struct{
+        float x1;
+        float x2;
+        float y1;
+        float y2;
+}rect;
+\end{verbatim}
+Es f\'acil ver que al ser un rect\'angulo simplemente cuatro floats, su tama\~no ser\'a de $16B$.
+\begin{verbatim}
+typedef struct{
+        rect *r;
+        int child;
+}nodeVal;
+\end{verbatim}
+En el caso de esta estructura, veremos que contiene un puntero a un rect\'angulo (que ya sabemos es de tama\~no $16B$ y un int, de $4B$, obteniendo as\'i un tama\~no de $20B$. 
+\begin{verbatim}
+typedef struct{
+        int size;
+        int address;
+        nodeVal *values[2*b+1];
+        rect *MBR;
+        int leaf;
+}node;
+\end{verbatim}
+Ahora finalmente podemos considerar aquello que nos interesa, que es el nodo. Tenemos que se compone de 3 enteros ($12B$), un \texttt{rect} ($16B$) y $b+1$ \texttt{nodeVal}s, que corresponden a $(2b+1)*20B$, resultando en que el tama\~no total debe ser $28 + 20(b+1)B$.
+Se debe determinar ahora el tama\~no de p\'agina del disco. Para ello, se utiliza el comando \texttt{sysconf(\_SC\_PAGESIZE)}, que nos arroja como resultado un tama\~no de $4096$ bytes.
+Despejando entonces $b$, se obtiene que el $b$ a utilizar debe ser aproximadamente $200$.
+%%esto esta malo creo D: de ahi me dicen como calcularon%%
+
+\subsection{Experimentaci\'on con Par\'ametros Fijos}
+Una vez determinados los par\'ametros a utilizar, se procedi\'o a realizar ejecuciones de \'estos utilizando distintas cantidades de elementos generados aleatoriamente. Tal como se pide en el enunciado, se utiliz\'o $n \in \{2^9, 2^{12}, 2^{15},...,2^{27}\}$ y $k \in \{1,3,7\}$, manteniendo as\'i fijo $m = n/(2k)$ intercalando las operaciones de inserci\'on, b\'usqueda y borrado. Se utilizaron las secuencias $i^{km}f^{km}$ para determinar la mejor inserci\'on, $(i^kd^ki^k)^mf^{km}$ para determinar el mejor borrado, y finalmente $(idi)^{km}f^{km}(did)^{km}$ para probar la estructura de datos completa con todas las operaciones.
+
+\subsubsection{Dificultades de Experimentaci\'on}
+\begin{itemize}
+\item La primera dificultad surgi\'o al terminar el desarrollo y comenzar la generaci\'on de rect\'angulos aleatorios, obteni\'endose casos que no se hab\'ian considerado y que ilustraron errores de implementaci\'on que no se hab\'ian detectado antes.
+\item Se encontraron problemas de dise\~no en la escritura de archivos, puesto que los valores no se escrib\'ian como enteros (en representaci\'on binaria), si no que como \texttt{char[]}, lo que hac\'ia mucho m\'as lenta la escritura y lectura. Al solucionar este problema se redujeron los tiempos a aproximadamente la mitad.
+\item Inicialmente se tomaron pruebas tomando $10$ muestras de cada combinaci\'on de $k$ y $n$, lo cual r\'apidamente condujo a que los algoritmos corrieran demasiado tiempo (en $2^{18}$ se corri\'o la prueba por m\'as de 8 horas sin terminar), por lo que se redujeron las muestras a $5$ y posteriormente a $2$ seg\'un el crecimiento del $n$.
+\end{itemize}
+
+\subsubsection{Descripci\'on del Hardware Utilizado}
+%nico tu compuuu%
+\section{Resultados}
+
+\section{Interpretaci\'on y Conclusiones}
+
+\section{Anexos}
+
+\end{document}
