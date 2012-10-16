@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.7.3)  15 OCT 2012 11:18
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.7.3)  15 OCT 2012 16:00
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -263,19 +263,19 @@ Package xypdf Info: Line width: 0.47998pt on input line 11.
  [1
 
 {/usr/local/texlive/2011/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 58.
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 54.
  (/usr/local/texlive/2011/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
-[3]
-Overfull \hbox (5.64842pt too wide) in paragraph at lines 89--90
+[3] [4]
+Overfull \hbox (5.64842pt too wide) in paragraph at lines 95--97
 \T1/cmr/m/n/12 to-ria-men-te. Tal co-mo se pi-de en el enun-cia-do, se uti-li-z
 ó $\OML/cmm/m/it/12 n \OMS/cmsy/m/n/12 2 f\OT1/cmr/m/n/12 2[]\OML/cmm/m/it/12 ;
  \OT1/cmr/m/n/12 2[]\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 2[]\OML/cmm/m/it/12 ; ::
 :; \OT1/cmr/m/n/12 2[]\OMS/cmsy/m/n/12 g$
  []
 
-[4] [5] (./tarea1.aux) ) 
+[5] [6] (./tarea1.aux) ) 
 Here is how much of TeX's memory you used:
  4395 strings out of 493633
  52914 string characters out of 3143378
@@ -283,7 +283,7 @@ Here is how much of TeX's memory you used:
  7646 multiletter control sequences out of 15000+200000
  16236 words of font info for 49 fonts, out of 3000000 for 9000
  831 hyphenation exceptions out of 8191
- 27i,6n,27p,3244b,244s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,6n,27p,3244b,201s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2011/texmf-dist/fonts/enc/dvips/cm-
 super/cm-super-t1.enc}</usr/local/texlive/2011/texmf-dist/fonts/type1/public/am
 sfonts/cm/cmmi12.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/public/ams
@@ -298,10 +298,10 @@ bx1200.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/public/cm-super/sfbx
 fb></usr/local/texlive/2011/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb
 ></usr/local/texlive/2011/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb><
 /usr/local/texlive/2011/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on tarea1.pdf (5 pages, 209962 bytes).
+Output written on tarea1.pdf (6 pages, 214257 bytes).
 PDF statistics:
- 73 PDF objects out of 1000 (max. 8388607)
- 52 compressed objects within 1 object stream
+ 76 PDF objects out of 1000 (max. 8388607)
+ 54 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
