@@ -1,0 +1,15 @@
+n=$1
+k=$2
+m=$(($n/2/$k))
+km=$(($k*$m))
+
+for (( i=1; i <= $m; i++ ))
+do
+echo $i
+#	./insertSequence k 2
+#	./deleteSequence k $3
+#	./insertSequence k 2
+done
+
+#./searchSequence $km
+

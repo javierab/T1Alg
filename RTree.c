@@ -36,8 +36,8 @@ RTree *readTree(){
 
 void writeRTree(RTree *t){
 	FILE *f = fopen("Tree","w");
-
-	fprintf(f, "%d\n", t->root->address);
+	if(t->root != NULL)
+		fprintf(f, "%d\n", t->root->address);
 }
 
 void freeRTree(RTree *t){
@@ -549,10 +549,15 @@ int recDelete2(rect *r, node *n, int pos){
                     return subTree;
                 }
             }
-            else
+            else{
+            	freeRect(n->values[i]->r);
+            	n->values[i]->r = dupRect(n1->MBR);
+                refreshMBR(n);
             	freeNode(n1);
+            }
         }
     }
+    writeNode(n);
 
     return -1;
 

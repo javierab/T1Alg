@@ -3,7 +3,11 @@ CC=gcc
 ODIR=obj
 
 
-all: insertSequence searchSequence deleteSequence idiSequence
+all: insertSequence searchSequence deleteSequence idiSequence didSequence
+
+didSequence: RTree.c rect.c node.c didSequence.c
+	gcc -o didSequence RTree.c rect.c node.c didSequence.c -lm
+	mkdir -p files
 
 
 idiSequence: RTree.c rect.c node.c idiSequence.c
