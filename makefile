@@ -1,27 +1,31 @@
 CC=gcc
-DEPS = tarea1.h RTree.h rect.h
-
-_OBJ = RTree.o rect.o selectInsertMethod.o node.o 
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 ODIR=obj
 
 
+all: insertSequence searchSequence deleteSequence idiSequence
 
-all: selectInsertMethod
 
-
-selectInsertMethod: $(OBJ)
-	gcc -o $@ $^ -lm
+idiSequence: RTree.c rect.c node.c idiSequence.c
+	gcc -o idiSequence RTree.c rect.c node.c idiSequence.c -lm
 	mkdir -p files
-	rm files/*
 
-objdir:
-	mkdir -p obj
 
-$(ODIR)/%.o: %.c objdir $(DEPS)
-	$(CC) -c -o $@ $< 
+deleteSequence: RTree.c rect.c node.c deleteSequence.c
+	gcc -o deleteSequence RTree.c rect.c node.c deleteSequence.c -lm
+	mkdir -p files
+
+insertSequence: RTree.c rect.c node.c insertSequence.c
+	gcc -o insertSequence RTree.c rect.c node.c insertSequence.c -lm
+	mkdir -p files
 	
+searchSequence: RTree.c rect.c node.c searchSequence.c
+	gcc -o searchSequence RTree.c rect.c node.c searchSequence.c -lm
+	mkdir -p files
+
+cleantree:
+	rm Tree
+	rm files/*
 
 clean:
 	rm -f $(ODIR)/*.o 

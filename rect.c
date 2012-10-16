@@ -22,7 +22,25 @@ float distancia(rect *r1, rect *r2){
     return sqrt((xc1-xc2)*(xc1-xc2)+(yc1-yc2)*(yc1-yc2));
 }
 
+rect *randRect(){
+	float x1=drand48()*500000;
+	float y1=drand48()*500000;
+	float size=drand48()*99 +1;
+	float x2= x1+size;
+	size=drand48()*99 +1;
+	float y2= y1+size;
+	while (y2>500000){
+		y1=drand48()*500000;
+		y2= y1+size;
+	}
+	while (x2>500000){
+		x1=drand48()*500000;
+		size=drand48()*99 +1;
+		x2= x1+size;
+	}
+	return makeRect(x1,y1,x2,y2);
 
+}
 
 
 void freeRect(rect *r){

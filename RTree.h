@@ -22,9 +22,11 @@ typedef struct{
 
 
 RTree *makeTree();
+RTree *readTree();
 void freeRTree(RTree *t);
 void insert(RTree *t, nodeVal *v);
 void freeNode(node *n);
 int search(rect *r, RTree *t, int **resp);
 void setInsertMethod(int i);
+void writeRTree(RTree *t);
 

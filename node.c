@@ -6,19 +6,25 @@
 #include <string.h>
 #include <errno.h>
 
-
 #include "node.h"
-
-
 
 char *path = "files";
 
+
+int reads = 0;
+int writes = 0;
 
 int getNextAdress(){
 	static int n=0;
 	return n++;
 }
 
+int getReads(){
+	return reads;
+}
+int getWrites(){
+	return writes;
+}
 
 node *makeNode(int leaf){
     int i;
@@ -74,6 +80,8 @@ node *makeNode(int leaf){
 //}
 
 node *readNode(int address){
+	++reads;
+
 	FILE *f;
 	node *n;
 	int child,size,leaf,i;
@@ -146,6 +154,8 @@ node *readNode(int address){
 //}
 
 void writeNode(node *n){
+	++writes;
+
 	char filename[20];
 	int i;
 	sprintf(filename,"%s/%d",path,n->address);

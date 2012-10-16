@@ -10,9 +10,34 @@ void setInsertMethod(int i){
 	insertMethod = i;
 }
 
-
 RTree *makeTree(){
-	return new(RTree);
+	RTree *t = new(RTree);
+	t->root = NULL;
+	return t;
+}
+
+RTree *readTree(){
+	RTree *t;
+	int root = -1;
+	FILE *f = fopen("Tree","r");
+
+	if(f == NULL){
+		return makeTree();
+	}
+	if(fscanf(f, "%d", &root) > 0){
+		t = makeTree();
+		t->root = readNode(root);
+	}
+	else
+		t = makeTree();
+
+	return t;
+}
+
+void writeRTree(RTree *t){
+	FILE *f = fopen("Tree","w");
+
+	fprintf(f, "%d\n", t->root->address);
 }
 
 void freeRTree(RTree *t){
@@ -376,12 +401,11 @@ void underflow(node *n, node *n1, int i){
 	}
 	else{
 		n2 = merge(n1,n2);
-		deleteValue(n, sibling);
         freeNodeVal(n->values[i]);
         n->values[i] = new(nodeVal);
 		n->values[i]->child = n2->address;
         n->values[i]->r=dupRect(n2->MBR);
-        refreshMBR(n);
+		deleteValue(n, sibling);
         writeNode(n);
 
 		freeNode(n2);
@@ -400,7 +424,7 @@ int recDelete(rect *r, node *n, int pos){
     	for(i = 0; i < n->size; ++i)
     		if(n->values[i]->child == pos){
             	deleteValue(n, i);
-
+            	writeNode(n);
     			return TRUE;
     		}
     	return FALSE;
@@ -411,10 +435,14 @@ int recDelete(rect *r, node *n, int pos){
             n1 = readNode(n->values[i]->child);
 
             if(recDelete(r, n1, pos)){
+            	n->values[i]->r = dupRect(n1->MBR);
                 if(n1->size < b )
                 	underflow(n, n1, i);
-                else
+                else{
+                	refreshMBR(n);
+                	writeNode(n);
     				freeNode(n1);
+                }
                 return TRUE;
             }
             else
@@ -585,6 +613,9 @@ void delete2(rect *r, RTree *t, int pos){
 
     }
     if(subTree != -1){
-    	insertTree(readNode(subTree), t);
+    	node *node = readNode(subTree);
+    	insertTree(node, t);
+    	destroyNode(node);
     }
 }
+

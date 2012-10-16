@@ -17,3 +17,4 @@ int intersect(rect *r1,rect *r2);
 float deltaMBR(rect *MBR, rect *newRect);
 rect *increaseMBR(rect *MBR, rect *newRect);
 void printRect(rect *r);
+rect *randRect();
